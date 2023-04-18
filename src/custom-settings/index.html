@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <link rel="stylesheet"
+        href="https://unpkg.com/@microsoft/webview-ui-toolkit@1.0.0-beta.6/dist/webview-ui-toolkit.min.css">
+    <link rel="stylesheet" href="${styleUri}">
+</head>
+
+<body>
+    <vscode-panels aria-label="Default">
+        <vscode-panel-tab id="tab-1">Extensions</vscode-panel-tab>
+        <vscode-panel-tab id="tab-2">Apps</vscode-panel-tab>
+        <vscode-panel-tab id="tab-3">Characters</vscode-panel-tab>
+        <vscode-panel-view id="view-1">
+            Tab-1
+        </vscode-panel-view>
+        <vscode-panel-view id="view-2">
+            Tab-2
+        </vscode-panel-view>
+        <vscode-panel-view id="view-3">
+            Tab-3
+        </vscode-panel-view>
+    </vscode-panels>
+    <script src="https://unpkg.com/@microsoft/webview-ui-toolkit@1.0.0-beta.6/dist/webview-ui-toolkit.min.js"></script>
+    <script src="${scriptUri}"></script>
+</body>
+
+</html>

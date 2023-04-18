@@ -1,0 +1,112 @@
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.margin-right {
+  margin-right: 1em;
+}
+
+.sub-component {
+  margin-top: 0.2em;
+}
+
+.title {
+  height: 2em;
+}
+
+.label {
+  margin: 0.8em 0 0.2em 0;
+}
+
+.label.large-margin {
+  margin-top: 1.5em;
+}
+
+.add-info-label {
+  opacity: 0.5;
+}
+
+.component-root {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  max-width: 1000px;
+}
+
+.input-min-width {
+  width: var(--input-min-width);
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  margin: 2em 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+#add-app-button {
+  width: 100%;
+  margin: 1em;
+}
+
+.output-preview {
+  white-space: pre;
+}
+
+#characters-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1em;
+}
+
+.character {
+  position: relative;
+  width: 100%;
+  margin: 1em;
+  padding-top: 1em;
+  display: flex;
+  flex-direction: column;
+  border: solid;
+  border-width: 0 0 0 0.2em;
+  padding-left: 1em;
+}
+
+#add-characters-button {
+  width: 100%;
+  margin: 1em;
+}
+
+.attribute-root {
+  margin: 1em 0;
+  margin-left: 2em;
+}
+
+.add-attr-button {
+  margin-left: 2em;
+}
+
+.attribute {
+  position: relative;
+}
+
+.duplicate {
+  color: var(--vscode-errorForeground);
+}
+
+.close-button {
+  position: absolute;
+  right: 0.5em;
+  top: 0.5em;
+}
+
+.color-code {
+  width: 7em;
+}
+
+summary {
+  font-size: 1.17em;
+  font-weight: bold;
+}
