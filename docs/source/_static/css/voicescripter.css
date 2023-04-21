@@ -1,0 +1,15 @@
+@import url("theme.css");
+
+.half-width{
+    width:50%;
+}
+.mac-deco{
+    display: none;
+}
+
+.mac .win-deco { display: none; }
+.iphone .win-deco { display: none; }
+.ipad .win-deco{ display: none; }
+.mac .mac-deco { display: inline; }
+.iphone .mac-deco { display: inline; }
+.ipad .mac-deco{ display: inline; }
