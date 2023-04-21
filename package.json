@@ -6,16 +6,16 @@
   "license": "MIT",
   "publisher": "wabimochi",
   "repository": {
-		"url": "https://github.com/wabimochi/VoiceScripter"
-	},
+    "url": "https://github.com/wabimochi/VoiceScripter"
+  },
   "icon": "images/icon.png",
   "keywords": [
-		"voiceroid",
-		"aivoice",
-		"a.i.voice",
-		"cevio",
-		"voicevox"
-	],
+    "voiceroid",
+    "aivoice",
+    "a.i.voice",
+    "cevio",
+    "voicevox"
+  ],
   "engines": {
     "vscode": "^1.76.0"
   },
@@ -151,7 +151,8 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "deploy": "vsce publish"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
@@ -162,6 +163,7 @@
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "@vscode/test-electron": "^2.3.0",
+    "@vscode/vsce": "^2.19.0",
     "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.36.0",
     "glob": "^8.1.0",

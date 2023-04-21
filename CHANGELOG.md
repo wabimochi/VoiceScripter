@@ -1,9 +1,12 @@
 # Change Log
 
-All notable changes to the "voicescripter" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
 ## [Unreleased]
 
+## [1.0.1]
+
+### Fixed
+
+-  軽微な不具合の修正
+
+## [1.0.0]
 - Initial release

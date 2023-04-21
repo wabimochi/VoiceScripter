@@ -65,6 +65,7 @@ export class CustomSetting {
         webviewPanel.onDidDispose(() => {
             const _renameReporter = new RenameReporter();
             _renameReporter.initializeFromRenameReporter(renameReporter);
+            validateAndFixSettings(settingsClone);
             updateCallback(settingsClone, _renameReporter);
         });
 
@@ -136,4 +137,13 @@ async function confirm(title: string) {
         title: title,
     });
     return result;
+}
+
+function validateAndFixSettings(settings: Settings){
+    const defaultAppName = settings.apps.length > 0 ? settings.apps[0].appName : '';
+    settings.characters.forEach(character => {
+        if(character.appName === ''){
+            character.appName = defaultAppName;
+        }
+    })
 }

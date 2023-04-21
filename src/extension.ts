@@ -96,6 +96,14 @@ export function activate(context: vscode.ExtensionContext) {
         (document) => {
             if (targetExtension === document.languageId) {
                 isEnable = true;
+                if(checkEnable(vscode.window.activeTextEditor)){
+                    applyDecorations(vscode.window.activeTextEditor!, options);
+                }
+            } else {
+                isEnable = false;
+                if(vscode.window.activeTextEditor){
+                    removeDecorations(vscode.window.activeTextEditor!, options);
+                }
             }
         },
         null,
@@ -108,6 +116,18 @@ export function activate(context: vscode.ExtensionContext) {
                 settingUpdate(editor!, options, renameReporter);
             } else {
                 isEnable = false;
+                removeDecorations(editor!, options);
+            }
+        },
+        null,
+        context.subscriptions
+    );
+    vscode.window.onDidChangeVisibleTextEditors(
+        (editors) => {
+            for(let i = 0; i < editors.length; i++){
+                if (checkEnable(editors[i])){
+                    applyDecorations(editors[i], options);
+                }
             }
         },
         null,
@@ -996,7 +1016,7 @@ let missingCharacterRange : vscode.DecorationOptions[] = []
 function applyDecorations(editor : vscode.TextEditor, options: Options) {
     if(options.settings !== undefined && options.updating === false){
         updateTalkSectionDecoration(editor, options);
-        updateMetaSectionDecoration();
+        updateMetaSectionDecoration(editor);
     }
 }
 
@@ -1064,11 +1084,10 @@ function updateTalkSectionDecoration(editor: vscode.TextEditor, options: Options
     }
 }
 
-function updateMetaSectionDecoration(){
-    const activeEditor = vscode.window.activeTextEditor;
-    if (activeEditor) {
+function updateMetaSectionDecoration(editor: vscode.TextEditor){
+    if (editor) {
         const decorationRange: vscode.Range[] = [];
-        const linesCount = activeEditor.document.lineCount;
+        const linesCount = editor.document.lineCount;
         for (let i = 0; i < linesCount; i++) {
             let isMissing = false;
             for(let j = 0; j < missingCharacterRange.length; j++){
@@ -1078,13 +1097,13 @@ function updateMetaSectionDecoration(){
                 }
             }
             if(isMissing) continue;
-            const line = activeEditor.document.lineAt(i);
+            const line = editor.document.lineAt(i);
             const lineText = line.text;
             if (lineText[0] === metaSectionCharacter) {
                 decorationRange.push(line.range);
             }
         }
-        activeEditor.setDecorations(metaTextDecoration, decorationRange);
+        editor.setDecorations(metaTextDecoration, decorationRange);
     }
 }
 
