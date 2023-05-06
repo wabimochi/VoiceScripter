@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { Settings, App, Character } from './settings';
 import { CustomSetting } from './custom-settings/custom-settings';
-import * as fs from 'fs';
 import * as path from 'path';
 import { RenameReporter } from './utilities/renameReporter';
 import { VarCharacterName, VarAttribute, VarBody } from './common';
@@ -11,7 +10,7 @@ import { TaskQueue } from './taskQueue';
 import axios, {CancelTokenSource} from 'axios';
 
 const metaSectionCharacter = '\\';
-const metaTrimRegex = new RegExp('^\\\\|\\\\$', 'g');
+const metaTrimRegex = new RegExp('^\\\\|\\\\$|\\\\\r$', 'g');
 const targetExtension = 'vstxt';
 
 interface RangeDict {
@@ -101,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             } else {
                 isEnable = false;
-                if(vscode.window.activeTextEditor){
+                if(vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId !== targetExtension){
                     removeDecorations(vscode.window.activeTextEditor!, options);
                 }
             }
@@ -116,7 +115,9 @@ export function activate(context: vscode.ExtensionContext) {
                 settingUpdate(editor!, options, renameReporter);
             } else {
                 isEnable = false;
-                removeDecorations(editor!, options);
+                if(editor){
+                    removeDecorations(editor!, options);
+                }
             }
         },
         null,
@@ -716,7 +717,7 @@ async function processAndCopySelectedText(editor: vscode.TextEditor, settings: S
         for(let i = appList.length - 1; i >= 0; i--){
             const result = getProcessedSelectedText(selectedText, settings, appList[i]);
             await vscode.env.clipboard.writeText(result);
-            await new Promise(resolve => setTimeout(resolve, 200)); // for mac
+            await new Promise(resolve => setTimeout(resolve, 300));
         };
     } else {
         const result = getProcessedSelectedText(selectedText, settings);   
@@ -857,11 +858,12 @@ async function showPreview(editor:vscode.TextEditor, options: Options) {
 }
 
 async function readSettingFile(settingFile: vscode.Uri): Promise<Settings> {
-    if(fs.existsSync(settingFile.path)){
+    try{
+        await vscode.workspace.fs.stat(settingFile);
         const content: Uint8Array = await vscode.workspace.fs.readFile(settingFile);
         const text = content.toString();
         return JSON.parse(text) as Settings;
-    } else {
+    } catch {
         return {
             assistant: {
                 maxLine: 5,
@@ -898,7 +900,7 @@ export async function settingUpdate(editor: vscode.TextEditor, options: Options,
         renameReporter = undefined;
         options.updating = false;
     }
-    makeDecoration(editor, options);
+    await makeDecoration(editor, options);
     applyDecorations(editor, options);
 }
 
@@ -941,7 +943,7 @@ async function rename(editor: vscode.TextEditor, settings: Settings | undefined,
     });
 }
 
-function makeDecoration(editor: vscode.TextEditor, options: Options) {
+async function makeDecoration(editor: vscode.TextEditor, options: Options) {
     const settings = options.settings;
     const context = options.context;
     const talkDecoration = options.talkDecoration;
@@ -963,10 +965,10 @@ function makeDecoration(editor: vscode.TextEditor, options: Options) {
 
     const nameLength = settings.extension.nameLength;
 
-    const createDeco = (iconPath: string | undefined, name: string, color: string) => {
+    const createDeco = (iconPath: vscode.Uri | undefined, name: string, color: string) => {
         const limitName = "　" + limitString(name, nameLength);
         return vscode.window.createTextEditorDecorationType({
-            gutterIconPath: iconPath ? context.asAbsolutePath(iconPath) : undefined,
+            gutterIconPath: iconPath,
             gutterIconSize: 'contain',
             before: {
                 contentText: limitName,
@@ -982,34 +984,40 @@ function makeDecoration(editor: vscode.TextEditor, options: Options) {
         });
     }
 
-    settings.characters.forEach((character) => {
-        const dirpath = path.join(context.globalStorageUri.path, 'images');
+    await Promise.all(settings.characters.map(async character => {
+        const dirpath = vscode.Uri.joinPath(context.globalStorageUri, 'images');
 
         if(character.attributes.length === 0){
-            let iconPath: string | undefined = path.join(dirpath, `${character.characterName}.png`); // fallback
-            if (!fs.existsSync(context.asAbsolutePath(iconPath))) {
-                iconPath = undefined
+            let iconPath: vscode.Uri | undefined = vscode.Uri.joinPath(dirpath, `${character.characterName}.png`);
+            try{
+                await vscode.workspace.fs.stat(iconPath);
+            } catch {
+                iconPath = undefined;
             }
             const colorbg = character.color;
             const name = character.characterName;
             const inlineTextDecorationType = createDeco(iconPath, name, colorbg);
             talkDecoration[name] = inlineTextDecorationType;
         } else {
-            character.attributes.forEach((attribute) => {
-                let iconPath: string | undefined =  path.join(dirpath, `${character.characterName}${attribute.attr}.png`);
-                if (!fs.existsSync(context.asAbsolutePath(iconPath))) {
-                    iconPath = path.join(dirpath, `${character.characterName}.png`); // fallback
-                    if (!fs.existsSync(context.asAbsolutePath(iconPath))) {
-                        iconPath = undefined
+            await Promise.all(character.attributes.map(async attribute => {
+                let iconPath: vscode.Uri | undefined = vscode.Uri.joinPath(dirpath, `${character.characterName}${attribute.attr}.png`);
+                try{
+                    await vscode.workspace.fs.stat(iconPath);
+                } catch {
+                    iconPath = vscode.Uri.joinPath(dirpath, `${character.characterName}.png`); // fallback
+                    try{
+                        await vscode.workspace.fs.stat(iconPath);                        
+                    } catch {
+                        iconPath = undefined;
                     }
                 }
                 const colorbg = attribute.colorInherit ? character.color : attribute.color;
                 const name = character.characterName + attribute.attr;
                 const inlineTextDecorationType = createDeco(iconPath, name, colorbg);
                 talkDecoration[name] = inlineTextDecorationType;
-            });
+            }));
         }
-    });
+    }));
 }
 
 let missingCharacterRange : vscode.DecorationOptions[] = []
